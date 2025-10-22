@@ -32,6 +32,8 @@ private slots:
 
     void btnTwoOperatorClicked();
 
+    void btnOneOperatorClicked();
+
     void on_btnPeriod_clicked();
 
     void on_btnDel_clicked();

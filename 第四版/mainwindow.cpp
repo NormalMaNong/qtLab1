@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QdeBug>
+#include <math.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -23,6 +24,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnDivide,SIGNAL(clicked()),this,SLOT(btnTwoOperatorClicked()));
     connect(ui->btnPlus,SIGNAL(clicked()),this,SLOT(btnTwoOperatorClicked()));
     connect(ui->btnMinus,SIGNAL(clicked()),this,SLOT(btnTwoOperatorClicked()));
+
+    connect(ui->btnPercentage,SIGNAL(clicked()),this,SLOT(btnOneOperatorClicked()));
+    connect(ui->btnInverse,SIGNAL(clicked()),this,SLOT(btnOneOperatorClicked()));
+    connect(ui->btnSquare,SIGNAL(clicked()),this,SLOT(btnOneOperatorClicked()));
+    connect(ui->btnSqrt,SIGNAL(clicked()),this,SLOT(btnOneOperatorClicked()));
 }
 
 MainWindow::~MainWindow()
@@ -91,7 +97,7 @@ QString MainWindow::calculation(bool *ok)
     }
     else
         ui->statusbar->showMessage(QString("op is %1,opcodes is %2").arg(ops.size()).arg(opcodes.size()));
-    qDebug() << result;
+    qDebug() << "result:" << result;
     return QString::number(result);
 }
 
@@ -100,6 +106,7 @@ void MainWindow::btnTwoOperatorClicked()
     opcode = qobject_cast<QPushButton*>(sender())->text();
     if(op != ""){
         ops.push_back(op);
+        qDebug() << "oprend:" << op;
         op = "";
         opcodes.push_back(opcode);
     }
@@ -108,14 +115,39 @@ void MainWindow::btnTwoOperatorClicked()
 
 }
 
+void MainWindow::btnOneOperatorClicked()
+{
+    if(op != ""){
+        double result = op.toDouble();
+        op = "";
+        QString o = qobject_cast<QPushButton*>(sender())->text();
+        if(o == "%"){
+            result = result / 100.0;
+        }
+        else if(o == "1/x"){
+            result = 1 / result;
+        }
+        else if(o == "x^2"){
+            result = result * result;
+        }
+        else if(o == "√"){
+            result =sqrt(result);
+        }
+        op = QString::number(result);
+        ui->display->setText(QString::number(result));
+    }
+}
+
 void MainWindow::on_btnEqual_clicked()
 {
     if(op != ""){
         ops.push_back(op);
         op = "";
     }
-
     QString result=calculation();
+    // qDebug() << "堆栈顶为:" << ops.front();
+    // op = ops.front();
+    // qDebug() << "op:" << op;
     ui->display->setText(result);
 }
 
