@@ -89,7 +89,7 @@ QString MainWindow::calculation(bool *ok)
         else if(o == "×"){
             result = num1 * num2;
         }
-        else if(o == "/"){
+        else if(o == "÷"){
             result = num1 / num2;
         }
         QString s =QString::number(result);
@@ -127,7 +127,7 @@ void MainWindow::btnOneOperatorClicked()
         else if(o == "1/x"){
             result = 1 / result;
         }
-        else if(o == "x^2"){
+        else if(o == "x²"){
             result = result * result;
         }
         else if(o == "√"){
@@ -145,9 +145,6 @@ void MainWindow::on_btnEqual_clicked()
         op = "";
     }
     QString result=calculation();
-    // qDebug() << "堆栈顶为:" << ops.front();
-    // op = ops.front();
-    // qDebug() << "op:" << op;
     ui->display->setText(result);
 }
 
