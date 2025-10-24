@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QdeBug>
 #include <math.h>
+#include <QKeyEvent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -9,16 +10,32 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->btnNum0,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
-    connect(ui->btnNum1,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
-    connect(ui->btnNum2,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
-    connect(ui->btnNum3,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
-    connect(ui->btnNum4,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
-    connect(ui->btnNum5,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
-    connect(ui->btnNum6,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
-    connect(ui->btnNum7,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
-    connect(ui->btnNum8,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
-    connect(ui->btnNum9,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
+    digitBtns = {{Qt::Key_0,ui->btnNum0},
+                 {Qt::Key_1,ui->btnNum1},
+                 {Qt::Key_2,ui->btnNum2},
+                 {Qt::Key_3,ui->btnNum3},
+                 {Qt::Key_4,ui->btnNum4},
+                 {Qt::Key_5,ui->btnNum5},
+                 {Qt::Key_6,ui->btnNum6},
+                 {Qt::Key_7,ui->btnNum7},
+                 {Qt::Key_8,ui->btnNum8},
+                 {Qt::Key_9,ui->btnNum9},
+                };
+
+    foreach (auto btn, digitBtns) {
+        connect(btn,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
+    }
+
+    // connect(ui->btnNum0,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
+    // connect(ui->btnNum1,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
+    // connect(ui->btnNum2,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
+    // connect(ui->btnNum3,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
+    // connect(ui->btnNum4,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
+    // connect(ui->btnNum5,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
+    // connect(ui->btnNum6,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
+    // connect(ui->btnNum7,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
+    // connect(ui->btnNum8,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
+    // connect(ui->btnNum9,SIGNAL(clicked()),this,SLOT(btnNumClicked()));
 
     connect(ui->btnMultiple,SIGNAL(clicked()),this,SLOT(btnTwoOperatorClicked()));
     connect(ui->btnDivide,SIGNAL(clicked()),this,SLOT(btnTwoOperatorClicked()));
@@ -65,8 +82,20 @@ void MainWindow::on_btnDel_clicked()
 void MainWindow::on_btnClean_clicked()
 {
     op.clear();
-    ui->display->setText(op );
+    ui->display->setText(op);
 }
+
+void MainWindow::on_btnCleanAll_clicked()
+{
+    ops.clear();
+    opcodes.clear();
+    op.clear();
+    opcode.clear();
+    isEqual = false;
+    equals = 0;
+    ui->display->setText(op);
+}
+
 
 QString MainWindow::calculation(bool *ok)
 {
@@ -94,19 +123,20 @@ QString MainWindow::calculation(bool *ok)
         }
         QString s =QString::number(result);
         ops.push_back(s);
+        ui->statusbar->showMessage(QString(" Calculation Done,ops is %1,opcodes is %2").arg(ops.size()).arg(opcodes.size()));
     }
     else
-        ui->statusbar->showMessage(QString("op is %1,opcodes is %2").arg(ops.size()).arg(opcodes.size()));
-    qDebug() << "result:" << result;
+        ui->statusbar->showMessage(QString("ops is %1,opcodes is %2").arg(ops.size()).arg(opcodes.size()));
     return QString::number(result);
 }
 
 void MainWindow::btnTwoOperatorClicked()
 {
+    equals = 0;
     opcode = qobject_cast<QPushButton*>(sender())->text();
     if(op != ""){
-        ops.push_back(op);
-        qDebug() << "oprend:" << op;
+        if(!isEqual)
+            ops.push_back(op);
         op = "";
         opcodes.push_back(opcode);
     }
@@ -138,13 +168,54 @@ void MainWindow::btnOneOperatorClicked()
     }
 }
 
-void MainWindow::on_btnEqual_clicked()
+void MainWindow::on_btnSign_clicked()
 {
     if(op != ""){
-        ops.push_back(op);
+        if(op == "0" || op == "0.")
+            return;
+        else if(op.indexOf("-") < 0)
+            op = "-" + op;
+        else
+            op = op.mid(1);
+    }
+    ui->display->setText(op);
+}
+
+
+void MainWindow::on_btnEqual_clicked()
+{
+    isEqual = true;
+    if(op != ""){
+        if(equals < 1)
+            ops.push_back(op);
         op = "";
     }
-    QString result=calculation();
+    equals++;
+    if(equals > 1){
+        //用于连等运算
+        ops.push_back(n2);
+        opcodes.push_back(equalOp);
+    }
+    else{
+        //用于连等运算存储
+        n2 = ops.front();
+        equalOp = opcode;
+    }
+    QString result = calculation();
     ui->display->setText(result);
+    op = result;
 }
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    foreach(auto btnKey, digitBtns.keys())
+    {
+        if(event->key() == btnKey)
+            digitBtns[btnKey]->animateClick();
+    }
+}
+
+
+
+
 

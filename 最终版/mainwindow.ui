@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>622</width>
-    <height>415</height>
+    <height>658</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>计算器-郭梓轩-2023414290411</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QPushButton{
